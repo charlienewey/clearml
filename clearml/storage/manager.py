@@ -161,15 +161,20 @@ class StorageManager(object):
                 temp_target_folder = cache_folder / "{0}_{1}_{2}".format(
                     target_folder.name, time() * 1000, str(random()).replace('.', ''))
                 temp_target_folder.mkdir(parents=True, exist_ok=True)
-
-            if suffix == ".zip":
-                ZipFile(cached_file.as_posix()).extractall(path=temp_target_folder.as_posix())
-            elif suffix == ".tar.gz":
-                with tarfile.open(cached_file.as_posix()) as file:
-                    safe_extract(file, temp_target_folder.as_posix())
-            elif suffix == ".tgz":
-                with tarfile.open(cached_file.as_posix(), mode='r:gz') as file:
-                    safe_extract(file, temp_target_folder.as_posix())
+            base_logger(f"temp_target_folder: {temp_target_folder}")
+            
+            try:
+                if suffix == ".zip":
+                    ZipFile(cached_file.as_posix()).extractall(path=temp_target_folder.as_posix())
+                elif suffix == ".tar.gz":
+                    with tarfile.open(cached_file.as_posix()) as file:
+                        safe_extract(file, temp_target_folder.as_posix())
+                elif suffix == ".tgz":
+                    with tarfile.open(cached_file.as_posix(), mode='r:gz') as file:
+                        safe_extract(file, temp_target_folder.as_posix())
+            except Exception as e:
+                base_logger.error(f"error extracting zip: {e}")
+                raise e
 
             if temp_target_folder != target_folder:
                 # we assume we will have such folder if we already extract the file
